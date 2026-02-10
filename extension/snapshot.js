@@ -32,7 +32,7 @@ function buildPageSnapshot(options = {}) {
         try {
             if (!ids) return '';
             const parts = [];
-            ids.split(/\\s+/).forEach(id => {
+            ids.split(/\s+/).forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
                     const t = (el.innerText || el.textContent || '').trim();
@@ -64,7 +64,7 @@ function buildPageSnapshot(options = {}) {
             const parts = [];
             while (walker.nextNode()) {
                 const text = walker.currentNode.textContent || '';
-                const clean = text.replace(/\\s+/g, ' ').trim();
+                const clean = text.replace(/\s+/g, ' ').trim();
                 if (clean) {
                     parts.push(clean);
                     if (parts.join(' ').length > 240) {
@@ -75,11 +75,11 @@ function buildPageSnapshot(options = {}) {
             if (parts.length) {
                 return parts.join(' ').trim().substring(0, 200);
             }
-            const fallback = (el.innerText || el.textContent || '').replace(/\\s+/g, ' ').trim();
+            const fallback = (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
             return fallback.substring(0, 200);
         } catch (_) {
             try {
-                const text = (el.innerText || '').replace(/\\s+/g, ' ').trim();
+                const text = (el.innerText || '').replace(/\s+/g, ' ').trim();
                 return text.substring(0, 200);
             } catch (_) {
                 return '';
@@ -432,7 +432,7 @@ function buildPageSnapshot(options = {}) {
     ]);
 
     function isValidRef(ref) {
-        return typeof ref === 'string' && /^e\\d+$/.test(ref);
+        return typeof ref === 'string' && /^e\d+$/.test(ref);
     }
 
     function getMaxRefIndex() {

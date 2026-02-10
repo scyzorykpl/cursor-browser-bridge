@@ -189,23 +189,33 @@ const TOOL_DEFS = [
 let bridgePort = null;
 
 async function waitForPort() {
+    const oldPort = bridgePort;
     const start = Date.now();
     while (Date.now() - start < POLL_TIMEOUT_MS) {
         try {
             const port = parseInt(fs.readFileSync(PORT_FILE, 'utf8').trim(), 10);
-            if (port > 0) { bridgePort = port; return port; }
+            // On reconnect, wait for a NEW port (different from the stale one)
+            if (port > 0 && (oldPort === null || port !== oldPort)) {
+                bridgePort = port;
+                return port;
+            }
         } catch (_) {}
         await new Promise(r => setTimeout(r, POLL_INTERVAL_MS));
     }
+    // Fall back to whatever's in the file, even if same port
+    try {
+        const port = parseInt(fs.readFileSync(PORT_FILE, 'utf8').trim(), 10);
+        if (port > 0) { bridgePort = port; return port; }
+    } catch (_) {}
     throw new Error(`Browser Bridge extension not running (no port file at ${PORT_FILE} after ${POLL_TIMEOUT_MS}ms)`);
 }
 
-function callTool(name, args) {
+function httpPost(port, name, args) {
     return new Promise((resolve, reject) => {
         const body = JSON.stringify({ name, args });
         const req = http.request({
             hostname: '127.0.0.1',
-            port: bridgePort,
+            port,
             path: '/tool',
             method: 'POST',
             headers: {
@@ -229,6 +239,21 @@ function callTool(name, args) {
         req.write(body);
         req.end();
     });
+}
+
+async function callTool(name, args) {
+    try {
+        return await httpPost(bridgePort, name, args);
+    } catch (err) {
+        if (err.code === 'ECONNREFUSED') {
+            // Extension probably restarted on a new port — re-read port file
+            process.stderr.write(`[mcp-bridge] Connection refused on port ${bridgePort}, reconnecting...\n`);
+            await waitForPort();
+            process.stderr.write(`[mcp-bridge] Reconnected on port ${bridgePort}\n`);
+            return await httpPost(bridgePort, name, args);
+        }
+        throw err;
+    }
 }
 
 // ---------------------------------------------------------------------------
