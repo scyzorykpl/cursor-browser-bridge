@@ -1,0 +1,14 @@
+{
+  "name": "cursor-browser-bridge",
+  "displayName": "Cursor Browser Bridge",
+  "description": "Exposes Cursor's embedded browser as an HTTP API for MCP clients (Claude Code, etc.)",
+  "version": "0.2.0",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "extensionKind": ["workspace"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {}
+}
