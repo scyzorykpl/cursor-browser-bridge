@@ -1,0 +1,1 @@
+# cursor-browser-bridge
